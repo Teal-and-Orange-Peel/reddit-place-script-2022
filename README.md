@@ -1,10 +1,8 @@
-# Reddit Place Script 2022
-
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+# Reddit Place Script 2022 (R/Israel edition)
 
 ## About
 
-This is a script to draw a JPG onto r/place (<https://www.reddit.com/r/place/>).
+This is a script to draw a PNG onto r/place (<https://www.reddit.com/r/place/>).
 
 ## Features
 
