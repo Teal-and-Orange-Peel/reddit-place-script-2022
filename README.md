@@ -140,8 +140,6 @@ The nox CI job will run flake8 on the code. You can also do this locally by pip 
 
 Once you've navigated to the correct folder on your terminal, run `python3 main.py`
 
- - It is also possible to launch this script in Idle if you've installed Python from the official Python website. This may be easier, but is generally not the preferred way to launch, as Idle's built in command line output is notoriously slow and may bottleneck the script. 
-
 ### Can the script deal with JPG compression? 
 
  - Yes, to a limited extent. The script will try to find the closest matching pixel and use it. However, PNGs are lossless and much more accurate, and do not suffer from compression artifacts that may negatively impact the final image. PNG's are very strongly preferred. 
