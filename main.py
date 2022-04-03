@@ -489,7 +489,6 @@ while True:
             print("\n")
 
             if not placing:
-                print("About to sleep")
                 last_time_placed_pixel = math.floor(time.time())
 
             placing = True
