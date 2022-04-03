@@ -116,3 +116,7 @@ ENV_UNVERIFIED_PLACE_FREQUENCY='True'
 ## Developing
 The nox CI job will run flake8 on the code. You can also do this locally by pip installing nox on your system and running 
 `nox` in the repository directory.
+
+## Known issues
+- Mac OS users need to run their Python Installations "Install Certificates.command" before this script will connect. Nondescript errors may result otherwise. This can usually be found in Applications/Install Certificates.command 
+- The script is sometimes very slow on the first iteration to fetch certificates. This issue is more likely to occur if the server is bogged down, and can cause the first rotation to be slower than subsequent rotations.  
