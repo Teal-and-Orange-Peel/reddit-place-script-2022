@@ -15,8 +15,8 @@ import ssl
 import copy
 
 # Used to randomly generate different sleep times between accounts (in seconds) - an attempt to reduce the risk of bans
-time_fuzz_min = 10
-time_fuzz_max = 21
+time_fuzz_min = 15
+time_fuzz_max = 30
 
 # Mac OS users, since Python doesn't properly install the certificates and cannot use Mac OS' global certs
 # If you're still having issues on Mac OS, see Python's official documentation regarding "Install Certificates.command". Manually running this will fix the issue (follow Python 3's official documentation) 
