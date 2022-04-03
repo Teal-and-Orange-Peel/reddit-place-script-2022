@@ -10,6 +10,17 @@ from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
 from PIL import ImageColor
 from PIL import Image
+import random
+import ssl
+import copy
+
+# Used to randomly generate different sleep times between accounts (in seconds) - an attempt to reduce the risk of bans
+time_fuzz_min = 10
+time_fuzz_max = 21
+
+# Mac OS users, since Python doesn't properly install the certificates and cannot use Mac OS' global certs
+# If you're still having issues on Mac OS, see Python's official documentation regarding "Install Certificates.command". Manually running this will fix the issue (follow Python 3's official documentation) 
+ssl._create_default_https_context = ssl._create_unverified_context 
 
 # load env variables
 load_dotenv()
@@ -64,8 +75,14 @@ for color_hex, color_index in color_map.items():
 
 print("available colors (rgb): ", rgb_colors_array)
 
-image_path = os.path.join(os.path.abspath(os.getcwd()), 'unknown.png')
-im = Image.open(image_path)
+try: 
+    # Old version of script (some folks still using jpg files, we don't want to break the script for them)
+    image_path = os.path.join(os.path.abspath(os.getcwd()), 'Untitled.jpg')
+    im = Image.open(image_path)
+except: 
+    # New version of script (using PNG files, preferred format)
+    image_path = os.path.join(os.path.abspath(os.getcwd()), 'unknown.png')
+    im = Image.open(image_path)
 
 pix = im.convert('RGBA').load()
 print("image size: ", im.size)  # Get the width and hight of the image for iterating over
@@ -121,7 +138,7 @@ def fill_accounts():
         len(json.loads(os.getenv('ENV_PLACE_SECRET_KEY'))))
 
     if len(json.loads(os.getenv('ENV_PLACE_USERNAME'))) != (len(json.loads(os.getenv('ENV_PLACE_USERNAME'))) + len(json.loads(os.getenv('ENV_PLACE_PASSWORD'))) + len(json.loads(os.getenv('ENV_PLACE_APP_CLIENT_ID'))) + len(json.loads(os.getenv('ENV_PLACE_SECRET_KEY'))))/4:
-        print("Your .env file is messed up")
+        print("Your .env file is messed up. Your arrays are not the same length, some of the required information is missing from some of your accounts. Did you forget to fill out one of the fields?")
         quit()
 
     i = 0
@@ -137,7 +154,6 @@ def fill_accounts():
         }
 
         accounts[name] = account
-
         i += 1
 
 # note: reddit limits us to place 1 pixel every 5 minutes, so I am setting it to 5 minutes and 30 seconds per pixel
@@ -195,14 +211,16 @@ def get_valid_auth(name):
 
         #print("received response: ", r.text)
 
-        response_data = r.json()
-
-        accounts[name]['access_token'] = response_data["access_token"]
-        accounts[name]['access_token_type'] = response_data["token_type"]  # this is just "bearer"
-        accounts[name]['expires_at_timestamp'] = current_timestamp + int(response_data["expires_in"])  # this is usually "3600"
-        accounts[name]['access_token_scope'] = response_data["scope"]  # this is usually "*"
-
-        print("received new access token: ", accounts[name]['access_token'])
+        try:
+            response_data = r.json() 
+            accounts[name]['access_token'] = response_data["access_token"]
+            accounts[name]['access_token_type'] = response_data["token_type"]  # this is just "bearer"
+            accounts[name]['expires_at_timestamp'] = current_timestamp + int(response_data["expires_in"])  # this is usually "3600"
+            accounts[name]['access_token_scope'] = response_data["scope"]  # this is usually "*"
+            print("received new access token: ", accounts[name]['access_token'])
+        except: 
+            print("\nWARNING: There was an issue with this account: " + name + ". Most often, this is caused if the access token is not properly set to 'script' on Reddit, but it could be also caused by various other things. Skipping this account for now...")
+        
 
 def completeness(img):
     x = 0
@@ -236,10 +254,10 @@ def completeness(img):
 fill_accounts()
 
 error_count = 0
-error_limit = 10
+error_limit = 100
 
 # method to draw a pixel at an x, y coordinate in r/place with a specific color
-def set_pixel(access_token_in, x, y, color_index_in=18, canvas_index=0):
+def set_pixel(access_token_in, x, y, color_index_in=18, canvas_index=0, accountName=""):
     global error_count
     global error_limit
     print("placing pixel")
@@ -277,15 +295,37 @@ def set_pixel(access_token_in, x, y, color_index_in=18, canvas_index=0):
     if 'errors' in json.loads(response.text):
         print(response.text)
         error_count += 1
-        if error_count > error_limit:
-            print("Some thing bad has happened, you've passed the error limit")
-            quit()
-        print("that's probably not good",error_count,"error(s)")
-        print("next pixel in",((int(current_timestamp)-int(json.loads(response.text)['errors']['extensions']['nextAvailablePixelTs'])))/1000,"seconds")
+        try: 
+            print("\n That's probably not good.",error_count,"error(s) from server. This is usually caused by soft-banned accounts, we will try to skip this account and continue reporting how many errors we encounter. \n")
+            print("next pixel in",((int(current_timestamp)-int(json.loads(response.text)['errors']['extensions']['nextAvailablePixelTs'])))/1000,"seconds")
+        except: 
+            ignoreThis = True # Because Python won't let you have a try without an except block. 
+            # Doing this in a try/except to handle a scenario where Reddit might try to change the response format. This sort of thing helps to prevent our bot from breaking if they do. 
 
+        # Error_count represents the number of banned accounts (or accounts that otherwise have issues). Default limit before quitting: 100
+        if error_count > error_limit:
+            print("\nSome thing bad has happened, you've passed the error limit. Most often caused by banned accounts, but can also be caused by bad access tokens or a server connectivity issue. Try increasing your error limit in main.py (default: 100)")
+            quit()    
+
+        # Remove the account from the list to prevent it from slowing down the others
+        try:  
+            accounts.pop(accountName, None)
+            print("Successfully removed error-causing account from rotation. Continuing with next account... \n")
+        except: 
+            print("Warning: We tried to remove error-causing account '" + accountName + "' from the rotation, but encountered an error in the process. (This is embarassing!) ")
+
+        # Below: Buggy, rewriting this. 
+        #timeNext = ((int(current_timestamp)-int(json.loads(response.text)['errors']['extensions']['nextAvailablePixelTs'])))/1000
+        #if timeNext >= 1250: 
+        #    print("Skipping this account, it appears to be softbanned. ")
+        #    error_count -= 1   # Don't increment the error counter if we're dealing with soft banned accounts (yes, this is a messy way of handling this, but it avoids messing with other types of errors in existing script)
+        #if error_count > error_limit:
+        #    print("Some thing bad has happened, you've passed the error limit")
+        #    quit()
+        
 def get_board(bearer):
     print("Getting board")
-    ws = create_connection("wss://gql-realtime-2.reddit.com/query")
+    ws = create_connection("wss://gql-realtime-2.reddit.com/query", verify=False, ssl=False)
     ws.send(json.dumps({"type":"connection_init","payload":{"Authorization":"Bearer "+bearer}}))
     ws.recv()
     ws.send(json.dumps({"id":"1","type":"start","payload":{"variables":{"input":{"channel":{"teamOwner":"AFD2022","category":"CONFIG"}}},"extensions":{},"operationName":"configuration","query":"subscription configuration($input: SubscribeInput!) {\n  subscribe(input: $input) {\n    id\n    ... on BasicMessage {\n      data {\n        __typename\n        ... on ConfigurationMessageData {\n          colorPalette {\n            colors {\n              hex\n              index\n              __typename\n            }\n            __typename\n          }\n          canvasConfigurations {\n            index\n            dx\n            dy\n            __typename\n          }\n          canvasWidth\n          canvasHeight\n          __typename\n        }\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"}}))
@@ -398,12 +438,19 @@ def get_unset_pixel(img):
 current_r = 0
 current_c = 0
 
+fullRotation=False  # Flag set when full rotation is complete. 
 # loop to keep refreshing tokens when necessary and to draw pixels when the time is right
 while True:
     placing = False
 
+    # Calculate length of account list once per rotation
+    # We can't do this every pixel because we would hit rate limits if we need to remove a banned account mid-rotation. 
+    # As such, precalculating at the beginning of each rotation reduces the liklihood of our accounts getting banned
+    rotationLength = len(accounts)
+    accountsRotation = copy.deepcopy(accounts)
+
     #does things
-    for name, info in accounts.items():
+    for name, info in accountsRotation.items():
         current_timestamp = math.floor(time.time())
         get_valid_auth(name)
 
@@ -434,7 +481,7 @@ while True:
                 canvas += 1
 
             try:
-                set_pixel(info['access_token'], pixelx, pixely, pixel_color_index, canvas)
+                set_pixel(info['access_token'], pixelx, pixely, pixel_color_index, canvas, name)
             except Exception as e:
                 print(e)
 
@@ -445,6 +492,7 @@ while True:
                 last_time_placed_pixel = math.floor(time.time())
 
             placing = True
+        time.sleep((pixel_place_frequency/rotationLength)+2)
 
-        time.sleep((pixel_place_frequency/len(accounts))+2)
-    time.sleep(10)
+    fullRotation=True
+    time.sleep(random.randint(time_fuzz_min, time_fuzz_max)) # time fuzzing, an attempt to reduce the risk of bans.
