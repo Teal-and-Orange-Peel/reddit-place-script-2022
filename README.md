@@ -3,7 +3,7 @@
 ## About
 
  - This is a script to draw a PNG onto r/place (<https://www.reddit.com/r/place/>).
- - This version expands upon the work done by LordKnish and adds additional improvements to the handling of banned accounts by allowing the script to gracefully skip over them rather than throwing fatal errors or getting bogged down. Also implements time fuzzing to reduce the chance of bans, as well as few other minor bug fixes. 
+ - This version expands upon the work done by LordKnish and adds additional improvements to the handling of banned accounts by allowing the script to gracefully skip over them rather than experiencing performance problems or throwing fatal errors. This version also implements time fuzzing to reduce the chance of bans, as well as few other minor bug fixes. 
  - **Make sure to check #place-battle-plan for the current image, and replace unknown.png and new_image.png accordingly! It is critical that all operators use the exact same image. It must be scaled down to the correct size, and be exact pixel-for-pixel to prevent bot instances from overwriting each other.** 
  
 ### Upgrading from previous versions: 
@@ -130,7 +130,7 @@ The nox CI job will run flake8 on the code. You can also do this locally by pip 
 
 ### How do I create .env? 
 
-- Use a code editor (such as Notepad++ or Geany, or any code editor of your choice), and save the filename as .env exactly. It is a hidden file and won't be visible in your file browser afterwards. Do not use a standard text editor or word processor to create this, as it won't be saved in the correct format! 
+- Use a code editor (such as Notepad++ or Geany, or any code editor of your choice), and save the filename as .env exactly. It is a hidden file and won't be visible in your file browser afterwards (if you can still see it in your file browser, it wasn't created correctly). Do not use a standard text editor or word processor to create this, as it won't be saved in the correct format! 
 
 ### How do I run this? 
 
@@ -146,4 +146,8 @@ Once you've navigated to the correct folder on your terminal, run `python3 main.
 
 ### Do coordinates and images have to be exact? 
 
-- Yes, it must be pixel perfect. Coordinates that are even a single pixel off will cause bot instances to overwrite each other. Images are drawn at a pixel-scale, where 1 pixel = 1 tile. 
+- Yes, it must be pixel perfect. Coordinates that are even a single pixel off will cause bot instances to overwrite each other.
+
+### What scale are the images drawn at? 
+
+- Images are pixel-for-tile. 1 pixel = 1 tile. (Make sure to get images directly from #place-battle-plan! It's very important that all images are exactly the same, even slight differences between bot operators will cause the bots to overwrite each other). 
