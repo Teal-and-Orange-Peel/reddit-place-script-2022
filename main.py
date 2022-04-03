@@ -489,10 +489,14 @@ while True:
             print("\n")
 
             if not placing:
+                print("About to sleep")
                 last_time_placed_pixel = math.floor(time.time())
 
             placing = True
-        time.sleep((pixel_place_frequency/rotationLength)+2)
+
+        # We don't want to sleep if we're still fetching auth data. Wait until we're actually drawing pixels before we start the rotation timer. 
+        if (fullRotation == True):
+            time.sleep((pixel_place_frequency/rotationLength)+2)
 
     fullRotation=True
     time.sleep(random.randint(time_fuzz_min, time_fuzz_max)) # time fuzzing, an attempt to reduce the risk of bans.
