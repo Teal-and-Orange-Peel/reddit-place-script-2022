@@ -124,7 +124,7 @@ The nox CI job will run flake8 on the code. You can also do this locally by pip 
 `nox` in the repository directory.
 
 ## Known issues
-- Mac OS users need to run their Python Installations "Install Certificates.command" before this script will connect. Nondescript errors may result otherwise. This can usually be found in Applications/Install Certificates.command
+- Mac OS users need to run their Python Installations "Install Certificates.command" before this script will connect. Nondescript errors may result otherwise. This can usually be found in /Applications/Python 3.10/Install Certificates.command
 
 ## FAQ
 
