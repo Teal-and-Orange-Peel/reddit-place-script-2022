@@ -2,7 +2,8 @@
 
 ## About
 
-This is a script to draw a PNG onto r/place (<https://www.reddit.com/r/place/>).
+ - This is a script to draw a PNG onto r/place (<https://www.reddit.com/r/place/>).
+ - This version expands upon the work done by LordKnish and adds additional improvements to the handling of banned accounts by allowing the script to gracefully skip over them rather than throwing fatal errors or getting bogged down. Also implements time fuzzing to reduce chances of bans, as well as few other minor bug fixes. 
 
 ## Features
 
