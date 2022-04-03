@@ -4,7 +4,8 @@
 
  - This is a script to draw a PNG onto r/place (<https://www.reddit.com/r/place/>).
  - This version expands upon the work done by LordKnish and adds additional improvements to the handling of banned accounts by allowing the script to gracefully skip over them rather than throwing fatal errors or getting bogged down. Also implements time fuzzing to reduce chances of bans, as well as few other minor bug fixes. 
-
+ - **Make sure to check #place-battle-plan for the current image, and replace unknown.png and new_image.png accordingly! It is critical that all operators use the exact same image. It must be scaled down to the correct size, and be exact pixel-for-pixel to prevent bot instances from overwriting each other. 
+ - 
 ### Upgrading from previous versions: 
 
  - For existing bot setups, you can update to this version by simply replacing main.py with the file on this repository. No other files were changed for this version, so simply replace main.py and relaunch the script! 
