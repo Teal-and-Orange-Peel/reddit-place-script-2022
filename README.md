@@ -3,7 +3,7 @@
 ## About
 
  - This is a script to draw a PNG onto r/place (<https://www.reddit.com/r/place/>).
- - This version expands upon the work done by LordKnish and adds additional improvements to the handling of banned accounts by allowing the script to gracefully skip over them rather than throwing fatal errors or getting bogged down. Also implements time fuzzing to reduce chances of bans, as well as few other minor bug fixes. 
+ - This version expands upon the work done by LordKnish and adds additional improvements to the handling of banned accounts by allowing the script to gracefully skip over them rather than throwing fatal errors or getting bogged down. Also implements time fuzzing to reduce the chance of bans, as well as few other minor bug fixes. 
  - **Make sure to check #place-battle-plan for the current image, and replace unknown.png and new_image.png accordingly! It is critical that all operators use the exact same image. It must be scaled down to the correct size, and be exact pixel-for-pixel to prevent bot instances from overwriting each other.** 
  
 ### Upgrading from previous versions: 
@@ -30,7 +30,7 @@ Steps:
 
 1. Visit <https://www.reddit.com/prefs/apps>
 2. Click "create (another) app" button at very bottom
-3. Select the "script" option and fill in the fields with anything
+3. Select the "script" option and fill in the fields with anything (you can use http://example.com for the URL fields, or any URL of your choosing) 
 
 If you don't want to create a development app for each account, you can add each username as a developer in the developer app settings. You will need to duplicate the client ID and secret in .env, though.
 
@@ -44,7 +44,7 @@ pip3 install -r requirements.txt
 
 ## Get Started
 
-Create a file called '.env'
+Create a file called '.env' *(important: Make sure to use a code editor such as Geany (Mac OS) or Notepad++ (Windows) to create this file! Standard text editors and file browsers won't let you save this correctly.)*
 
 Put in the following content:
 
@@ -70,7 +70,7 @@ ENV_C_START='["0"]'
 
 ### Notes: 
 - Multiple fields can be passed into the arrays to spawn a thread for each one.
-- Change image.png/.jpg to specify what image to draw. One pixel is drawn every 5 minutes
+- Change unknown.png/untitled.jpg to specify what image to draw. One pixel is drawn every 5 minutes. (unknown.png is preferred. Don't provide both, the script will only use one!) 
 - PNG has priority over JPG
 
 ## Run the Script
@@ -124,5 +124,28 @@ The nox CI job will run flake8 on the code. You can also do this locally by pip 
 `nox` in the repository directory.
 
 ## Known issues
-- Mac OS users need to run their Python Installations "Install Certificates.command" before this script will connect. Nondescript errors may result otherwise. This can usually be found in Applications/Install Certificates.command 
-- The script is sometimes very slow on the first iteration to fetch certificates. This issue is more likely to occur if the server is bogged down, and can cause the first rotation to be slower than subsequent rotations.  
+- Mac OS users need to run their Python Installations "Install Certificates.command" before this script will connect. Nondescript errors may result otherwise. This can usually be found in Applications/Install Certificates.command
+
+## FAQ
+
+### How do I create .env? 
+
+- Use a code editor (such as Notepad++ or Geany, or any code editor of your choice), and save the filename as .env exactly. It is a hidden file and won't be visible in your file browser afterwards. Do not use a standard text editor or word processor to create this, as it won't be saved in the correct format! 
+
+### How do I run this? 
+
+- Open a terminal on your computer, and navigate to the folder that this script is located on your computer. 
+- Windows: `Dir` lists the files in the current folder, and `Dir FOLDERNAME` changes the terminal's current "working directory" to this new folder. 
+- Mac OS/Linux: `ls` lists everything in the current directory. `cd FOLDERNAME` changes into the new directory. 
+
+Once you've navigated to the correct folder on your terminal, run `python3 main.py`
+
+ - It is also possible to launch this script in Idle if you've installed Python from the official Python website. This may be easier, but is generally not the preferred way to launch, as Idle's built in command line output is notoriously slow and may bottleneck the script. 
+
+### Can the script deal with JPG compression? 
+
+ - Yes, to a limited extent. The script will try to find the closest matching pixel and use it. However, PNGs are lossless and much more accurate, and do not suffer from compression artifacts that may negatively impact the final image. PNG's are very strongly preferred. 
+
+### Do coordinates and images have to be exact? 
+
+- Yes, it must be pixel perfect. Coordinates that are even a single pixel off will cause bot instances to overwrite each other. Images are drawn at a pixel-scale, where 1 pixel = 1 tile. 
